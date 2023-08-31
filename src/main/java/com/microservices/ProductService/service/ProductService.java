@@ -6,6 +6,7 @@ import com.microservices.ProductService.model.ProductRequest;
 import com.microservices.ProductService.model.ProductResponse;
 import com.microservices.ProductService.repository.ProductRepository;
 import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
+@Log4j2
 public class ProductService {
 
     private ProductRepository productRepository;
@@ -70,5 +72,28 @@ public class ProductService {
         ProductResponse productResponse = new ProductResponse();
         BeanUtils.copyProperties(product,productResponse);
         return productResponse;
+    }
+
+
+    public void checkAvailableProduct(long productId, int quantity){
+        log.info("Validation the quantity of the product");
+        ProductResponse product = getById(productId);
+        if (product.getQuantity() < quantity){
+            throw new CustomException(
+                    "Product does not have sufficient Quantity",
+                    "INSUFFICIENT_QUANTITY",
+                    400
+            );
+        }
+    }
+
+    public void reduceQuantity(long productId, int quantity){
+        ProductResponse productRes = getById(productId);
+        Product product = new Product();
+        BeanUtils.copyProperties(productRes,product);
+
+        product.setQuantity(product.getQuantity()-quantity);
+        productRepository.save(product);
+        log.info("Product Quantity updated Successfully");
     }
 }

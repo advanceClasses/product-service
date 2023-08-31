@@ -42,4 +42,16 @@ public class ProductController {
         return new ResponseEntity<>(productService.delete(id), HttpStatus.OK);
     }
 
+    @GetMapping("checkAvail/{id}")
+    public ResponseEntity<Void> checkAvailProduct(@PathVariable("id") long productId, @RequestParam int quantity){
+        productService.checkAvailableProduct(productId,quantity);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @PutMapping("reduceQuantity/{id}")
+    public ResponseEntity<Void> reduceQuantity(@PathVariable("id") long productId, @RequestParam int quantity){
+        productService.reduceQuantity(productId,quantity);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
 }
