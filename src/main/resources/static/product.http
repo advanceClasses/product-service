@@ -1,0 +1,27 @@
+@url = http://localhost:8085/product
+### Get all
+GET {{url}}/
+### Get by id
+GET {{url}}/1
+### Create
+POST {{url}}/
+Content-Type: application/json
+
+{
+  "name" : "test2",
+  "price" : 1000,
+  "quantity" : 5
+}
+
+### Update
+PUT {{url}}/3
+Content-Type: application/json
+
+{
+  "quantity" : 2,
+  "amount" : 3,
+  "statusId" : 2
+}
+
+### Delete
+DELETE  {{url}}/1
