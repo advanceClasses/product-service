@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -45,13 +44,12 @@ public class ProductController {
     @GetMapping("checkAvail/{id}")
     public ResponseEntity<Void> checkAvailProduct(@PathVariable("id") long productId, @RequestParam int quantity){
         productService.checkAvailableProduct(productId,quantity);
-        return new ResponseEntity(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PutMapping("reduceQuantity/{id}")
     public ResponseEntity<Void> reduceQuantity(@PathVariable("id") long productId, @RequestParam int quantity){
         productService.reduceQuantity(productId,quantity);
-        return new ResponseEntity(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
-
 }

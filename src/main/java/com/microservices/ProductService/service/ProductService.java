@@ -8,11 +8,7 @@ import com.microservices.ProductService.repository.ProductRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.BeanUtils;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,20 +21,22 @@ public class ProductService {
 
     public List<ProductResponse> getAll(){
         return productRepository.findAll()
-                .stream()
-                .map(product -> {
-                    ProductResponse productResponse = new ProductResponse();
-                    BeanUtils.copyProperties(product,productResponse);
-                    return productResponse;
-                }).collect(Collectors.toList());
+            .stream()
+            .map(product -> {
+                ProductResponse productResponse = new ProductResponse();
+                BeanUtils.copyProperties(product,productResponse);
+                return productResponse;
+            }
+        ).collect(Collectors.toList());
     }
 
     public ProductResponse getById(long id){
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new CustomException("Product with id " + id + " not found","PRODUCT_NOT_FOUND",404));
+            .orElseThrow(
+                () -> new CustomException("Product with id " + id + " not found","PRODUCT_NOT_FOUND",404)
+            );
         return productResponseMap(product);
     }
-
 
     public ProductResponse create(ProductRequest productRequest){
         Product product = new Product();
@@ -67,22 +65,25 @@ public class ProductService {
         return productResponse;
     }
 
-
     public static ProductResponse productResponseMap(Product product){
         ProductResponse productResponse = new ProductResponse();
         BeanUtils.copyProperties(product,productResponse);
         return productResponse;
     }
 
-
-    public void checkAvailableProduct(long productId, int quantity){
+    public void checkAvailableProduct(long productId, long quantity){
         log.info("Validation the quantity of the product");
         ProductResponse product = getById(productId);
-        if (product.getQuantity() < quantity){
+        if (product.getQuantity() < quantity || quantity <= 0){
             throw new CustomException(
-                    "Product does not have sufficient Quantity",
-                    "INSUFFICIENT_QUANTITY",
-                    400
+                "Product does not have sufficient Quantity",
+                "INSUFFICIENT_QUANTITY",
+                400
+            );
+        } else {
+            throw new CustomException(
+                "Success -> Produk available for quantity: " + quantity,
+                200
             );
         }
     }
@@ -92,8 +93,28 @@ public class ProductService {
         Product product = new Product();
         BeanUtils.copyProperties(productRes,product);
 
-        product.setQuantity(product.getQuantity()-quantity);
-        productRepository.save(product);
-        log.info("Product Quantity updated Successfully");
+        if (product.getQuantity() == 0){
+            throw new CustomException(
+                "Product is unavailable :(",
+                "INSUFFICIENT_QUANTITY",
+                400
+            );
+        }
+        else if (quantity > product.getQuantity() || quantity <= 0){
+            throw new CustomException(
+                "Product does not have sufficient Quantity",
+                "INSUFFICIENT_QUANTITY",
+                400
+            );
+        }
+        else {
+            product.setQuantity(product.getQuantity()-quantity);
+            productRepository.save(product);
+            log.info("Product Quantity updated Successfully");
+            throw new CustomException(
+                "Success -> Produk reduces successfully ^_^",
+                200
+            );
+        }
     }
 }
